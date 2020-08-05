@@ -207,6 +207,10 @@ class MlirHloBuilder : public XlaBuilder {
       XlaOp operand, XlaOp token, const Shape& shape_with_layout,
       const string& outfeed_config) override;
 
+  StatusOr<XlaOp> CholeskyInternal(const Shape& shape,
+                                   XlaOp operand,
+                                   bool lower) override;
+
   StatusOr<XlaOp> ConcatInDimInternal(const Shape& shape,
                                       absl::Span<const XlaOp> operands,
                                       int64 dimension) override;

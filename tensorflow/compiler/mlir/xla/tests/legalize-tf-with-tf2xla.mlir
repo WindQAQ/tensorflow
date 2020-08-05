@@ -265,6 +265,23 @@ func @non_max_suppression_v4(%arg0: tensor<3x4xf32>, %arg1: tensor<3xf32>, %arg2
   return %0#0 : tensor<2xi32>
 }
 
+// CHECK-LABEL: cholesky
+func @cholesky(%arg0: tensor<2x2xf32>) -> tensor<2x2xf32> {
+  // CHECK: %[[ZERO_F32:.*]] = mhlo.constant dense<0.000000e+00> : tensor<2x2xf32>
+  // CHECK: %[[ZERO_I32:.*]] = mhlo.constant dense<0> : tensor<2xi32>
+  // CHECK: %[[CHOLESKY:.*]] = "mhlo.cholesky"(%[[ARG0]]) {lower = true} : (tensor<2x2xf32>) -> tensor<2x2xf32>
+  // CHECK: %[[IOTA0:.*]] = "mhlo.iota"() {iota_dimension = 0 : i64} : () -> tensor<2xi32>
+  // CHECK: %[[IOTA1:.*]] = "mhlo.iota"() {iota_dimension = 0 : i64} : () -> tensor<2xi32>
+  // CHECK: %[[ADD:.*]] = mhlo.add %[[IOTA1]], %[[ZERO_I32]] : tensor<2xi32>
+  // CHECK: %[[BROADCAST0:.*]] = "mhlo.broadcast_in_dim"(%[[IOTA0]]) {broadcast_dimensions = dense<1> : tensor<1xi64>} : (tensor<2xi32>) -> tensor<2x2xi32>
+  // CHECK: %[[BROADCAST1:.*]] = "mhlo.broadcast_in_dim"(%[[ADD]]) {broadcast_dimensions = dense<0> : tensor<1xi64>} : (tensor<2xi32>) -> tensor<2x2xi32>
+  // CHECK: %[[GE:.*]] = "mhlo.compare"(%[[BROADCAST1]], %[[BROADCAST0]]) {comparison_direction = "GE"} : (tensor<2x2xi32>, tensor<2x2xi32>) -> tensor<2x2xi1>
+  // CHECK: %[[SEL:.*]] = "mhlo.select"(%[[GE]], %[[CHOLESKY]], %[[ZERO_F32]]) : (tensor<2x2xi1>, tensor<2x2xf32>, tensor<2x2xf32>) -> tensor<2x2xf32>
+  // CHECK: return %[[SEL]] : tensor<2x2xf32>
+  %0 = "tf.Cholesky"(%arg0) : (tensor<2x2xf32>) -> tensor<2x2xf32>
+  return %0 : tensor<2x2xf32>
+}
+
 // TODO(hinsu): Add a test with a valid TF op for which tf2xla kernel is
 // available but doesn't support this instance.
 }

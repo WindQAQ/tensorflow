@@ -410,6 +410,15 @@ StatusOr<XlaOp> MlirHloBuilder::ConcatInDimInternal(
       loc_, result_type, mlir_operands, builder_.getI64IntegerAttr(dimension)));
 }
 
+StatusOr<XlaOp> MlirHloBuilder::CholeskyInternal(
+    const Shape& shape, XlaOp operand, bool lower) {
+  TF_ASSIGN_OR_RETURN(
+      mlir::Type result_type,
+      ConvertShapeToType<mlir::RankedTensorType>(shape, builder_));
+  return MakeXlaOp(builder_.create<mlir::mhlo::CholeskyOp>(
+      loc_, result_type, GetValue(operand), builder_.getBoolAttr(lower)));
+}
+
 StatusOr<XlaOp> MlirHloBuilder::GetTupleElementInternal(const Shape& shape,
                                                         XlaOp tuple_data,
                                                         int64 index) {

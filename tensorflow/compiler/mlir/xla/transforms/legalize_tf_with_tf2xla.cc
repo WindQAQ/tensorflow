@@ -111,6 +111,7 @@ static bool IsOpAllowlisted(Operation* op) {
     TypeID::get<TF::BitwiseXorOp>(),
     TypeID::get<TF::BucketizeOp>(),
     TypeID::get<TF::CastOp>(),
+    TypeID::get<TF::CholeskyOp>(),
     TypeID::get<TF::ClipByValueOp>(),
     TypeID::get<TF::ComplexAbsOp>(),
     TypeID::get<TF::ConjugateTransposeOp>(),

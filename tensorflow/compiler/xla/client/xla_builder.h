@@ -515,6 +515,11 @@ class XlaBuilder {
       int64 feature_group_count, int64 batch_group_count,
       const PrecisionConfig* precision_config);
 
+  XlaOp Cholesky(XlaOp a, bool lower);
+
+  virtual StatusOr<XlaOp> CholeskyInternal(const Shape& shape, XlaOp operand,
+                                           bool lower);
+
   XlaOp Fft(XlaOp operand, FftType fft_type,
             absl::Span<const int64> fft_length);
   virtual StatusOr<XlaOp> FftInternal(const Shape& shape, XlaOp operand,

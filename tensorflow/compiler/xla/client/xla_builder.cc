@@ -1341,6 +1341,25 @@ StatusOr<XlaOp> XlaBuilder::ConvGeneralDilatedInternal(
   return AddInstruction(std::move(instr), HloOpcode::kConvolution, {lhs, rhs});
 }
 
+XlaOp XlaBuilder::Cholesky(XlaOp a, bool lower) {
+  return ReportErrorOrReturn([&]() -> StatusOr<XlaOp> {
+    TF_ASSIGN_OR_RETURN(const Shape* a_shape, GetShapePtr(a));
+    TF_ASSIGN_OR_RETURN(Shape shape,
+                        ShapeInference::InferCholeskyShape(*a_shape));
+    return CholeskyInternal(shape, a, lower);
+  });
+}
+
+StatusOr<XlaOp> XlaBuilder::CholeskyInternal(const Shape& shape,
+                                             XlaOp operand,
+                                             bool lower) {
+  HloInstructionProto instr;
+  *instr.mutable_shape() = shape.ToProto();
+  xla::CholeskyOptions& options = *instr.mutable_cholesky_options();
+  options.set_lower(lower);
+  return AddInstruction(std::move(instr), HloOpcode::kCholesky, {operand});
+}
+
 XlaOp XlaBuilder::Fft(XlaOp operand, const FftType fft_type,
                       const absl::Span<const int64> fft_length) {
   return ReportErrorOrReturn([&]() -> StatusOr<XlaOp> {
@@ -3405,18 +3424,7 @@ XlaOp TriangularSolve(XlaOp a, XlaOp b, bool left_side, bool lower,
 }
 
 XlaOp Cholesky(XlaOp a, bool lower) {
-  XlaBuilder* builder = a.builder();
-  return builder->ReportErrorOrReturn([&]() -> StatusOr<XlaOp> {
-    HloInstructionProto instr;
-    TF_ASSIGN_OR_RETURN(const Shape* a_shape, builder->GetShapePtr(a));
-    xla::CholeskyOptions& options = *instr.mutable_cholesky_options();
-    options.set_lower(lower);
-    TF_ASSIGN_OR_RETURN(Shape shape,
-                        ShapeInference::InferCholeskyShape(*a_shape));
-    *instr.mutable_shape() = shape.ToProto();
-
-    return builder->AddInstruction(std::move(instr), HloOpcode::kCholesky, {a});
-  });
+  return a.builder()->Cholesky(a, lower);
 }
 
 XlaOp Infeed(XlaBuilder* builder, const Shape& shape, const string& config) {

@@ -1446,6 +1446,31 @@ that are not a number (NaN) or infinity (Inf). Otherwise, passes `tensor` as-is.
   TF_DerivedOperandTypeAttr T = TF_DerivedOperandTypeAttr<0>;
 }
 
+def TF_CholeskyOp : TF_Op<"Cholesky", [SameOperandsAndResultType]> {
+  let summary = "Computes the Cholesky decomposition of one or more square matrices.";
+
+  let description = [{
+The `input` is a tensor of shape `[..., M, M]` whose inner-most 2 dimensions form square matrices.
+
+The `input` has to be symmetric and positive definite.
+Only the lower-triangular part of the input will be used for this operation.
+The upper-triangular part will not be read.
+
+The output is a tensor of the same shape as the input containing the
+Cholesky decompositions for all input submatrices `[..., :, :]`.
+  }];
+
+  let arguments = (ins
+    TF_FpOrComplexTensor:$input
+  );
+
+  let results = (outs
+    TF_FpOrComplexTensor:$output
+  );
+
+  TF_DerivedOperandTypeAttr T = TF_DerivedOperandTypeAttr<0>;
+}
+
 def TF_ClipByValueOp : TF_Op<"ClipByValue", [NoSideEffect, TF_SameOperandsAndResultElementTypeResolveRef]> {
   let summary = "Clips tensor values to a specified min and max.";
 
